@@ -5,16 +5,19 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const preference = {
-      items: body.items,
+      items: [
+        {
+          title: body.title,
+          unit_price: body.price,
+          quantity: 1
+        }
+      ],
       back_urls: {
         success: process.env.NEXT_PUBLIC_SITE_URL + "/success",
         failure: process.env.NEXT_PUBLIC_SITE_URL + "/failure",
-        pending: process.env.NEXT_PUBLIC_SITE_URL + "/pending",
+        pending: process.env.NEXT_PUBLIC_SITE_URL + "/pending"
       },
-      auto_return: "approved",
-      payment_methods: {
-        excluded_payment_types: [], // Mantemos vazio para aceitar cartão de crédito, débito e PIX
-      },
+      auto_return: "approved"
     };
 
     const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
@@ -27,9 +30,9 @@ export async function POST(req: Request) {
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
-      return NextResponse.json({ error: data.message }, { status: response.status });
+      return NextResponse.json({ error: data.message || "Erro ao criar preferência de pagamento" }, { status: response.status });
     }
 
     return NextResponse.json(data);
